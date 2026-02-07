@@ -5,6 +5,7 @@ using Selu383.SP26.Api.Features.Users;
 using Selu383.SP26.Api.Features.Roles;
 using Selu383.SP26.Api.Features.UserRoles;
 using Selu383.SP26.Api.Features.Locations;
+using Selu383.SP25.P02.Api.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,8 +23,10 @@ builder.Services.AddIdentity<User, Role>()
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
+    var services = scope.ServiceProvider;
     var db = scope.ServiceProvider.GetRequiredService<DataContext>();
-    await db.Database.EnsureCreatedAsync();
+    await db.Database.MigrateAsync();
+    await Seed.EnsureSeededAsync(services);
 
     if (!db.Locations.Any())
     {

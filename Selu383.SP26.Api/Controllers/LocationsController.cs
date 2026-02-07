@@ -1,7 +1,13 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Win32.SafeHandles;
 using Selu383.SP26.Api.Data;
+using System.Linq;
+using System.Security.Claims;
+using Selu383.SP26.Api.Features.Users;
 using Selu383.SP26.Api.Features.Locations;
+using System.Xml;
 
 namespace Selu383.SP26.Api.Controllers;
 
@@ -45,11 +51,31 @@ public class LocationsController(
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public ActionResult<LocationDto> Create(LocationDto dto)
     {
         if (dto.TableCount < 1)
         {
-            return BadRequest();
+            return BadRequest("Table count is required.");
+        }
+
+        if (dto.Id > 0)
+        {
+            var userExists = dataContext.Users.Any(u => u.Id == dto.Id);
+            if (!userExists)
+            {
+                return BadRequest("Invalid Id. User does not exist.");
+            }
+        }
+
+        if (dto.Name.Length > 120)
+        {
+            return BadRequest("Name is too long.");
+        }
+
+        if (string.IsNullOrEmpty(dto.Address))
+        {
+            return BadRequest("Address is required.");
         }
 
         var location = new Location
