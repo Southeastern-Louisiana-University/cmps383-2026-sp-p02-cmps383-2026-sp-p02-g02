@@ -39,7 +39,7 @@ using (var scope = app.Services.CreateScope())
     await roleManager.CreateAsync(new Role { Name = "Admin" });
 
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-//    var adminUser = await userManager.CreateAsync(new User { Name = "bob" }, "Password123!");
+    var adminUser = await userManager.CreateAsync(new User { UserName = "bob" }, "Password123!");
 }
 
 // Configure the HTTP request pipeline.
