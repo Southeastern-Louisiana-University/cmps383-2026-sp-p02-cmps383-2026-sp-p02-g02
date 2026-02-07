@@ -1,14 +1,11 @@
 using Selu383.SP26.Api.Features.Users;
 using Selu383.SP26.Api.Features.Roles;
-namespace Selu383.SP26.Api.Features;
-
-public class UserRole
+using Microsoft.AspNetCore.Identity;
+namespace Selu383.SP26.Api.Features.UserRoles
 {
-    public int UserId { get; set; }
-
-    public required User User {  get; set; }
-
-    public int RoleId { get; set; }
-
-    public required Role Role { get; set; }
+    public class UserRole : IdentityUserRole<int>
+    {
+        public User User { get; set; } = default!;
+        public Role Role { get; set; } = default!;
+    }
 }

@@ -4,6 +4,7 @@ using Selu383.SP26.Api.Data;
 using Selu383.SP26.Api.Features.Users;
 using Selu383.SP26.Api.Features.Roles;
 using Selu383.SP26.Api.Features.UserRoles;
+using Selu383.SP26.Api.Features.Locations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,14 +23,14 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<DataContext>();
-    db.Database.Migrate();
+    await db.Database.EnsureCreatedAsync();
 
     if (!db.Locations.Any())
     {
         db.Locations.AddRange(
- //           new Location { Name = "Location 1", Address = "123 Main St", TableCount = 10 },
- //           new Location { Name = "Location 2", Address = "456 Oak Ave", TableCount = 20 },
- //           new Location { Name = "Location 3", Address = "789 Pine Ln", TableCount = 15 }
+            new Location { Name = "Location 1", Address = "123 Main St", TableCount = 10 },
+            new Location { Name = "Location 2", Address = "456 Oak Ave", TableCount = 20 },
+            new Location { Name = "Location 3", Address = "789 Pine Ln", TableCount = 15 }
         );
         db.SaveChanges();
     }
@@ -38,7 +39,7 @@ using (var scope = app.Services.CreateScope())
     await roleManager.CreateAsync(new Role { Name = "Admin" });
 
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-    var adminUser = await userManager.CreateAsync(new User { Name = "bob" }, "Password123!");
+//    var adminUser = await userManager.CreateAsync(new User { Name = "bob" }, "Password123!");
 }
 
 // Configure the HTTP request pipeline.

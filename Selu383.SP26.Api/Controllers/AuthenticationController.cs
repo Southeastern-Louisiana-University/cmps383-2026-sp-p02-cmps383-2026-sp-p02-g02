@@ -20,11 +20,11 @@ public class AuthenticationController(
     public async Task<ActionResult> Login(LoginDto loginDto)
     {
         var user = await userManager.FindByNameAsync(loginDto.UserName);
-
         if (user == null)
         {
             return Unauthorized();
         }
+
         var passwordValid = await userManager.CheckPasswordAsync(user, loginDto.Password);
         if (!passwordValid)
         {
