@@ -14,7 +14,7 @@ namespace Selu383.SP25.P02.Api.Data
 
             string[] roles = { "Admin", "User" };
 
-            //   Roles Exist
+            // makes sure that roles exist
             foreach (var role in roles)
             {
                 if (!await roleManager.RoleExistsAsync(role))
@@ -23,7 +23,7 @@ namespace Selu383.SP25.P02.Api.Data
                 }
             }
 
-            //  makes sure that Users Exist
+            // makes sure that users exist
             await CreateUserIfNotExists(userManager, "galkadi", "Admin");
             await CreateUserIfNotExists(userManager, "bob", "User");
             await CreateUserIfNotExists(userManager, "sue", "User");
