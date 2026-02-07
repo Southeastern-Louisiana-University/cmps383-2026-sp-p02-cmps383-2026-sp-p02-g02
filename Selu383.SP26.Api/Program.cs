@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Selu383.SP26.Api.Data;
-using Selu383.SP26.Api.Features.Locations;
+using Selu383.SP26.Api.Features.Users;
+using Selu383.SP26.Api.Features.Roles;
+using Selu383.SP26.Api.Features.UserRoles;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,8 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddIdentity<User, Role>()
+    .AddEntityFrameworkStores<DataContext>();
 
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
@@ -23,12 +27,18 @@ using (var scope = app.Services.CreateScope())
     if (!db.Locations.Any())
     {
         db.Locations.AddRange(
-            new Location { Name = "Location 1", Address = "123 Main St", TableCount = 10 },
-            new Location { Name = "Location 2", Address = "456 Oak Ave", TableCount = 20 },
-            new Location { Name = "Location 3", Address = "789 Pine Ln", TableCount = 15 }
+ //           new Location { Name = "Location 1", Address = "123 Main St", TableCount = 10 },
+ //           new Location { Name = "Location 2", Address = "456 Oak Ave", TableCount = 20 },
+ //           new Location { Name = "Location 3", Address = "789 Pine Ln", TableCount = 15 }
         );
         db.SaveChanges();
     }
+
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
+    await roleManager.CreateAsync(new Role { Name = "Admin" });
+
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+    var adminUser = await userManager.CreateAsync(new User { Name = "bob" }, "Password123!");
 }
 
 // Configure the HTTP request pipeline.
@@ -40,9 +50,17 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+app.UseAuthentication();
 
-app.MapControllers();
+app
+    .UseRouting()
+    .UseAuthorization()
+    .UseEndpoints(x =>
+    {
+        x.MapControllers();
+    });
+
+app.UseStaticFiles();
 
 app.Run();
 
