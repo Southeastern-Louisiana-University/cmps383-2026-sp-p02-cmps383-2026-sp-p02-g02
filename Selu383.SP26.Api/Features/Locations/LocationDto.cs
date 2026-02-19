@@ -12,6 +12,7 @@ public class LocationDto
 
     [Required]
     public string Address { get; set; } = string.Empty;
+    public int? ManagerId { get; set; }
 
     public int TableCount { get; set; }
 }

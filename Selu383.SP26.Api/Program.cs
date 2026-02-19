@@ -1,6 +1,11 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Selu383.SP26.Api.Data;
+using Selu383.SP26.Api.Features.Users;
+using Selu383.SP26.Api.Features.Roles;
+using Selu383.SP26.Api.Features.UserRoles;
 using Selu383.SP26.Api.Features.Locations;
+using Selu383.SP25.P02.Api.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,12 +17,16 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddIdentity<User, Role>()
+    .AddEntityFrameworkStores<DataContext>();
 
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
+    var services = scope.ServiceProvider;
     var db = scope.ServiceProvider.GetRequiredService<DataContext>();
-    db.Database.Migrate();
+    await db.Database.MigrateAsync();
+    await Seed.EnsureSeededAsync(services);
 
     if (!db.Locations.Any())
     {
@@ -28,6 +37,12 @@ using (var scope = app.Services.CreateScope())
         );
         db.SaveChanges();
     }
+
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
+    await roleManager.CreateAsync(new Role { Name = "Admin" });
+
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+    var adminUser = await userManager.CreateAsync(new User { UserName = "bob" }, "Password123!");
 }
 
 // Configure the HTTP request pipeline.
@@ -39,9 +54,17 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+app.UseAuthentication();
 
-app.MapControllers();
+app
+    .UseRouting()
+    .UseAuthorization()
+    .UseEndpoints(x =>
+    {
+        x.MapControllers();
+    });
+
+app.UseStaticFiles();
 
 app.Run();
 
