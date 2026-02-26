@@ -54,10 +54,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication();
+
 
 app
     .UseRouting()
+    .UseAuthentication()
     .UseAuthorization()
     .UseEndpoints(x =>
     {
@@ -66,7 +67,18 @@ app
 
 app.UseStaticFiles();
 
-app.Run();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSpa(x =>
+    {
+        x.UseProxyToSpaDevelopmentServer("http://localhost:5173");
+    });
+}
+else
+{
+    app.MapFallbackToFile("/index.html");
+}
+    app.Run();
 
 //see: https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-8.0
 // Hi 383 - this is added so we can test our web project automatically
